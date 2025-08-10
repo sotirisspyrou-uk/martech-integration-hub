@@ -1,14 +1,681 @@
-5. Analytics & Reporting Platform
-Folder: analytics_reporting/
+"""
+Executive Summary Generator for MarTech Integration Hub
 
-├── unified_analytics_dashboard.py
-├── custom_report_builder.py
-├── real_time_performance_monitor.py
-├── predictive_analytics_engine.py
-├── executive_summary_generator.py
-├── roi_calculation_framework.py
-├── data_visualization_tools.py
-└── automated_insight_generator.py
-Purpose: Comprehensive marketing analytics and business intelligence 
-Impact: 80% faster access to actionable marketing insights
+Generates C-suite ready executive summaries from marketing data with
+strategic insights, KPIs, and actionable recommendations.
 
+Author: Sotiris Spyrou
+Portfolio: https://verityai.co
+LinkedIn: https://www.linkedin.com/in/sspyrou/
+
+DISCLAIMER: This is demonstration code for portfolio purposes.
+Not intended for production use without proper testing and validation.
+"""
+
+import logging
+import pandas as pd
+import numpy as np
+from datetime import datetime, timedelta
+from typing import Dict, List, Any, Optional, Tuple
+from dataclasses import dataclass
+from enum import Enum
+import json
+
+logger = logging.getLogger(__name__)
+
+
+class SummaryType(Enum):
+    WEEKLY = "weekly"
+    MONTHLY = "monthly"
+    QUARTERLY = "quarterly"
+    CAMPAIGN = "campaign"
+    PERFORMANCE_REVIEW = "performance_review"
+
+
+@dataclass
+class ExecutiveKPI:
+    """Key Performance Indicator for executive reporting."""
+    name: str
+    current_value: float
+    previous_value: float
+    target_value: float
+    unit: str  # currency, percentage, number
+    trend: str  # up, down, stable
+    impact: str  # positive, negative, neutral
+    description: str
+
+
+@dataclass
+class StrategicRecommendation:
+    """Strategic recommendation with business impact."""
+    title: str
+    description: str
+    priority: str  # high, medium, low
+    estimated_impact: str
+    timeline: str
+    investment_required: Optional[str] = None
+    risk_level: str = "medium"
+
+
+class ExecutiveSummaryGenerator:
+    """
+    Generates executive-level marketing performance summaries.
+    
+    Designed for C-suite consumption with strategic insights,
+    clear KPIs, and actionable business recommendations.
+    """
+    
+    def __init__(self):
+        self.kpi_definitions = self._load_kpi_definitions()
+        self.industry_benchmarks = self._load_industry_benchmarks()
+        self.executive_templates = self._load_executive_templates()
+    
+    def _load_kpi_definitions(self) -> Dict[str, Dict]:
+        """Load standard marketing KPI definitions for executives."""
+        return {
+            'revenue_growth': {
+                'name': 'Revenue Growth Rate',
+                'unit': 'percentage',
+                'good_threshold': 10.0,
+                'benchmark': 15.0,
+                'description': 'Month-over-month revenue growth from marketing activities'
+            },
+            'customer_acquisition_cost': {
+                'name': 'Customer Acquisition Cost',
+                'unit': 'currency',
+                'good_threshold': 100.0,
+                'benchmark': 75.0,
+                'description': 'Average cost to acquire a new customer'
+            },
+            'marketing_roi': {
+                'name': 'Marketing ROI',
+                'unit': 'ratio',
+                'good_threshold': 3.0,
+                'benchmark': 4.0,
+                'description': 'Return on marketing investment across all channels'
+            },
+            'lead_conversion_rate': {
+                'name': 'Lead Conversion Rate',
+                'unit': 'percentage',
+                'good_threshold': 2.0,
+                'benchmark': 3.5,
+                'description': 'Percentage of leads that convert to customers'
+            },
+            'brand_awareness_lift': {
+                'name': 'Brand Awareness Lift',
+                'unit': 'percentage',
+                'good_threshold': 5.0,
+                'benchmark': 8.0,
+                'description': 'Increase in brand awareness metrics'
+            }
+        }
+    
+    def _load_industry_benchmarks(self) -> Dict[str, float]:
+        """Load industry benchmark data for comparison."""
+        return {
+            'avg_conversion_rate': 2.35,
+            'avg_cac': 85.0,
+            'avg_marketing_roi': 3.2,
+            'avg_email_open_rate': 21.3,
+            'avg_social_engagement': 1.9,
+            'avg_organic_traffic_growth': 12.5
+        }
+    
+    def _load_executive_templates(self) -> Dict[str, str]:
+        """Load executive summary templates."""
+        return {
+            'monthly': """
+# Monthly Marketing Performance Summary
+
+**Period:** {period}
+**Generated:** {generated_date}
+
+## Executive Overview
+{executive_overview}
+
+## Key Performance Indicators
+{kpi_section}
+
+## Strategic Insights
+{insights_section}
+
+## Recommendations & Next Steps
+{recommendations_section}
+
+## Resource Requirements
+{resource_section}
+
+---
+*Generated by MarTech Integration Hub | Portfolio: https://verityai.co*
+""",
+            'quarterly': """
+# Quarterly Business Review - Marketing Performance
+
+**Quarter:** {period}
+**Strategic Review Date:** {generated_date}
+
+## Business Impact Summary
+{business_impact}
+
+## Performance Against Targets
+{performance_section}
+
+## Market Position Analysis
+{market_analysis}
+
+## Strategic Recommendations
+{strategic_recommendations}
+
+## Investment Priorities
+{investment_priorities}
+
+---
+*Strategic Marketing Analytics by Sotiris Spyrou | https://www.linkedin.com/in/sspyrou/*
+"""
+        }
+    
+    def generate_executive_summary(
+        self,
+        data: Dict[str, pd.DataFrame],
+        summary_type: SummaryType = SummaryType.MONTHLY,
+        period: Optional[str] = None,
+        target_audience: str = "ceo"
+    ) -> str:
+        """
+        Generate comprehensive executive summary.
+        
+        Args:
+            data: Dictionary of marketing data from various platforms
+            summary_type: Type of summary to generate
+            period: Time period for the summary
+            target_audience: ceo, cmo, board
+        """
+        
+        try:
+            logger.info(f"Generating {summary_type.value} executive summary for {target_audience}")
+            
+            # Calculate KPIs
+            kpis = self._calculate_executive_kpis(data)
+            
+            # Generate insights
+            insights = self._generate_strategic_insights(data, kpis)
+            
+            # Create recommendations
+            recommendations = self._generate_strategic_recommendations(kpis, insights)
+            
+            # Format summary based on type
+            if summary_type == SummaryType.QUARTERLY:
+                return self._generate_quarterly_summary(kpis, insights, recommendations, period)
+            else:
+                return self._generate_monthly_summary(kpis, insights, recommendations, period)
+                
+        except Exception as e:
+            logger.error(f"Error generating executive summary: {e}")
+            return f"Error generating summary: {str(e)}"
+    
+    def _calculate_executive_kpis(self, data: Dict[str, pd.DataFrame]) -> List[ExecutiveKPI]:
+        """Calculate key KPIs for executive reporting."""
+        kpis = []
+        
+        try:
+            # Revenue Growth Rate
+            if 'revenue' in data and not data['revenue'].empty:
+                revenue_data = data['revenue']
+                if 'revenue' in revenue_data.columns and len(revenue_data) >= 2:
+                    current_revenue = revenue_data['revenue'].iloc[-1]
+                    previous_revenue = revenue_data['revenue'].iloc[-2]
+                    growth_rate = ((current_revenue - previous_revenue) / previous_revenue) * 100
+                    
+                    kpis.append(ExecutiveKPI(
+                        name="Revenue Growth Rate",
+                        current_value=growth_rate,
+                        previous_value=0.0,  # Could calculate month-over-month
+                        target_value=15.0,
+                        unit="percentage",
+                        trend="up" if growth_rate > 0 else "down",
+                        impact="positive" if growth_rate > 10 else "neutral",
+                        description="Marketing-attributed revenue growth month-over-month"
+                    ))
+            
+            # Customer Acquisition Cost
+            if 'campaigns' in data and not data['campaigns'].empty:
+                campaigns = data['campaigns']
+                if 'spend' in campaigns.columns and 'new_customers' in campaigns.columns:
+                    total_spend = campaigns['spend'].sum()
+                    total_customers = campaigns['new_customers'].sum()
+                    cac = total_spend / total_customers if total_customers > 0 else 0
+                    
+                    kpis.append(ExecutiveKPI(
+                        name="Customer Acquisition Cost",
+                        current_value=cac,
+                        previous_value=cac * 1.05,  # Simulated previous value
+                        target_value=75.0,
+                        unit="currency",
+                        trend="down" if cac < 85 else "up",
+                        impact="positive" if cac < 85 else "negative",
+                        description="Average cost to acquire a new customer across all channels"
+                    ))
+            
+            # Marketing ROI
+            if 'campaigns' in data and not data['campaigns'].empty:
+                campaigns = data['campaigns']
+                if 'spend' in campaigns.columns and 'revenue' in campaigns.columns:
+                    total_spend = campaigns['spend'].sum()
+                    total_revenue = campaigns['revenue'].sum()
+                    roi = (total_revenue / total_spend) if total_spend > 0 else 0
+                    
+                    kpis.append(ExecutiveKPI(
+                        name="Marketing ROI",
+                        current_value=roi,
+                        previous_value=roi * 0.95,  # Simulated previous value
+                        target_value=4.0,
+                        unit="ratio",
+                        trend="up" if roi > 3.0 else "down",
+                        impact="positive" if roi > 3.0 else "neutral",
+                        description="Return on marketing investment across all channels"
+                    ))
+            
+            # Lead Conversion Rate
+            if 'analytics' in data and not data['analytics'].empty:
+                analytics = data['analytics']
+                if 'conversions' in analytics.columns and 'sessions' in analytics.columns:
+                    total_conversions = analytics['conversions'].sum()
+                    total_sessions = analytics['sessions'].sum()
+                    conversion_rate = (total_conversions / total_sessions) * 100 if total_sessions > 0 else 0
+                    
+                    kpis.append(ExecutiveKPI(
+                        name="Lead Conversion Rate",
+                        current_value=conversion_rate,
+                        previous_value=conversion_rate * 0.92,  # Simulated previous value
+                        target_value=3.5,
+                        unit="percentage",
+                        trend="up" if conversion_rate > 2.5 else "stable",
+                        impact="positive" if conversion_rate > 2.5 else "neutral",
+                        description="Percentage of website visitors that convert to leads"
+                    ))
+            
+        except Exception as e:
+            logger.error(f"Error calculating KPIs: {e}")
+        
+        return kpis
+    
+    def _generate_strategic_insights(
+        self, 
+        data: Dict[str, pd.DataFrame], 
+        kpis: List[ExecutiveKPI]
+    ) -> List[str]:
+        """Generate strategic insights for executives."""
+        insights = []
+        
+        try:
+            # Performance vs Targets Analysis
+            above_target_kpis = [kpi for kpi in kpis if kpi.current_value >= kpi.target_value]
+            below_target_kpis = [kpi for kpi in kpis if kpi.current_value < kpi.target_value]
+            
+            if len(above_target_kpis) > len(below_target_kpis):
+                insights.append(
+                    f"**Strong Performance**: {len(above_target_kpis)} out of {len(kpis)} "
+                    f"key metrics are meeting or exceeding targets, indicating effective "
+                    f"marketing strategy execution."
+                )
+            else:
+                insights.append(
+                    f"**Performance Gap**: {len(below_target_kpis)} out of {len(kpis)} "
+                    f"key metrics are below target, suggesting need for strategic adjustment."
+                )
+            
+            # ROI Analysis
+            roi_kpis = [kpi for kpi in kpis if 'ROI' in kpi.name]
+            if roi_kpis and roi_kpis[0].current_value > 3.0:
+                insights.append(
+                    f"**Investment Efficiency**: Marketing ROI of {roi_kpis[0].current_value:.1f}x "
+                    f"demonstrates strong return on marketing investments, supporting "
+                    f"continued or increased budget allocation."
+                )
+            elif roi_kpis:
+                insights.append(
+                    f"**Investment Concern**: Current marketing ROI of {roi_kpis[0].current_value:.1f}x "
+                    f"is below industry benchmark, requiring optimization of channel mix "
+                    f"and campaign effectiveness."
+                )
+            
+            # Growth Trajectory
+            growth_kpis = [kpi for kpi in kpis if 'Growth' in kpi.name]
+            if growth_kpis and growth_kpis[0].current_value > 15:
+                insights.append(
+                    f"**Growth Momentum**: {growth_kpis[0].current_value:.1f}% growth rate "
+                    f"exceeds industry averages, positioning the company for market "
+                    f"share expansion and competitive advantage."
+                )
+            elif growth_kpis:
+                insights.append(
+                    f"**Growth Challenge**: Current growth rate of {growth_kpis[0].current_value:.1f}% "
+                    f"requires strategic intervention to accelerate customer acquisition "
+                    f"and market penetration."
+                )
+            
+            # Cost Efficiency
+            cac_kpis = [kpi for kpi in kpis if 'Acquisition Cost' in kpi.name]
+            if cac_kpis and cac_kpis[0].current_value < 85:
+                insights.append(
+                    f"**Cost Optimization**: Customer acquisition cost of ${cac_kpis[0].current_value:.0f} "
+                    f"is below industry benchmark, enabling profitable scaling of "
+                    f"marketing investments."
+                )
+            
+        except Exception as e:
+            logger.error(f"Error generating insights: {e}")
+        
+        return insights
+    
+    def _generate_strategic_recommendations(
+        self, 
+        kpis: List[ExecutiveKPI], 
+        insights: List[str]
+    ) -> List[StrategicRecommendation]:
+        """Generate strategic recommendations for executives."""
+        recommendations = []
+        
+        try:
+            # ROI-based recommendations
+            roi_kpis = [kpi for kpi in kpis if 'ROI' in kpi.name]
+            if roi_kpis and roi_kpis[0].current_value > 4.0:
+                recommendations.append(StrategicRecommendation(
+                    title="Scale High-Performing Channels",
+                    description="Increase marketing investment by 25-40% in top-performing channels to capitalize on strong ROI momentum",
+                    priority="high",
+                    estimated_impact="15-25% revenue increase",
+                    timeline="Next quarter",
+                    investment_required="$50K-100K additional budget",
+                    risk_level="low"
+                ))
+            elif roi_kpis and roi_kpis[0].current_value < 3.0:
+                recommendations.append(StrategicRecommendation(
+                    title="Optimize Channel Mix",
+                    description="Conduct comprehensive channel analysis and reallocate budget from underperforming to high-ROI channels",
+                    priority="high",
+                    estimated_impact="20-30% ROI improvement",
+                    timeline="6-8 weeks",
+                    investment_required="Reallocation of existing budget",
+                    risk_level="medium"
+                ))
+            
+            # Growth acceleration
+            growth_kpis = [kpi for kpi in kpis if 'Growth' in kpi.name]
+            if growth_kpis and growth_kpis[0].current_value < 10:
+                recommendations.append(StrategicRecommendation(
+                    title="Accelerate Customer Acquisition",
+                    description="Launch targeted acquisition campaigns in high-potential segments and expand successful campaign reach",
+                    priority="high",
+                    estimated_impact="2-3x growth rate improvement",
+                    timeline="30-45 days",
+                    investment_required="$25K-50K campaign budget",
+                    risk_level="medium"
+                ))
+            
+            # Technology and automation
+            recommendations.append(StrategicRecommendation(
+                title="Implement Advanced Marketing Automation",
+                description="Deploy AI-driven personalization and automated nurturing to improve conversion rates and customer lifetime value",
+                priority="medium",
+                estimated_impact="15-20% efficiency gain",
+                timeline="2-3 months",
+                investment_required="$20K-40K technology investment",
+                risk_level="low"
+            ))
+            
+            # Data and analytics enhancement
+            recommendations.append(StrategicRecommendation(
+                title="Enhance Marketing Attribution",
+                description="Implement multi-touch attribution modeling to optimize budget allocation and improve ROI measurement accuracy",
+                priority="medium",
+                estimated_impact="10-15% budget optimization",
+                timeline="4-6 weeks",
+                investment_required="$15K-25K analytics tools",
+                risk_level="low"
+            ))
+            
+        except Exception as e:
+            logger.error(f"Error generating recommendations: {e}")
+        
+        return recommendations
+    
+    def _generate_monthly_summary(
+        self, 
+        kpis: List[ExecutiveKPI],
+        insights: List[str],
+        recommendations: List[StrategicRecommendation],
+        period: Optional[str] = None
+    ) -> str:
+        """Generate monthly executive summary."""
+        
+        if not period:
+            period = datetime.now().strftime("%B %Y")
+        
+        # Format KPI section
+        kpi_section = "| Metric | Current | Target | Trend | Status |\n"
+        kpi_section += "|--------|---------|---------|-------|--------|\n"
+        
+        for kpi in kpis:
+            status = "✅" if kpi.current_value >= kpi.target_value * 0.9 else "⚠️" if kpi.current_value >= kpi.target_value * 0.8 else "❌"
+            trend_emoji = "📈" if kpi.trend == "up" else "📉" if kpi.trend == "down" else "➡️"
+            
+            if kpi.unit == "currency":
+                current_str = f"${kpi.current_value:.0f}"
+                target_str = f"${kpi.target_value:.0f}"
+            elif kpi.unit == "percentage":
+                current_str = f"{kpi.current_value:.1f}%"
+                target_str = f"{kpi.target_value:.1f}%"
+            else:
+                current_str = f"{kpi.current_value:.1f}"
+                target_str = f"{kpi.target_value:.1f}"
+            
+            kpi_section += f"| {kpi.name} | {current_str} | {target_str} | {trend_emoji} | {status} |\n"
+        
+        # Format insights section
+        insights_section = "\n".join(f"- {insight}" for insight in insights)
+        
+        # Format recommendations section
+        recommendations_section = ""
+        for i, rec in enumerate(recommendations[:3], 1):  # Top 3 recommendations
+            recommendations_section += f"""
+### {i}. {rec.title} ({rec.priority.upper()} PRIORITY)
+
+**Impact:** {rec.estimated_impact}  
+**Timeline:** {rec.timeline}  
+**Investment:** {rec.investment_required or 'TBD'}  
+**Risk Level:** {rec.risk_level.title()}
+
+{rec.description}
+"""
+        
+        # Executive overview
+        total_kpis_on_target = len([kpi for kpi in kpis if kpi.current_value >= kpi.target_value * 0.9])
+        performance_rating = "Excellent" if total_kpis_on_target >= len(kpis) * 0.8 else "Good" if total_kpis_on_target >= len(kpis) * 0.6 else "Needs Improvement"
+        
+        executive_overview = f"""
+**Performance Rating:** {performance_rating}  
+**KPIs on Target:** {total_kpis_on_target}/{len(kpis)}  
+
+This month's marketing performance shows {"strong execution across key metrics" if total_kpis_on_target >= len(kpis) * 0.7 else "mixed results requiring strategic attention"}. Our integrated MarTech platform has provided comprehensive visibility into campaign effectiveness and ROI optimization opportunities.
+
+**Key Highlights:**
+- Marketing ROI demonstrates {"strong" if len([k for k in kpis if "ROI" in k.name and k.current_value > 3.0]) > 0 else "adequate"} return on investment
+- Customer acquisition {"efficiency" if len([k for k in kpis if "Cost" in k.name and k.current_value < 85]) > 0 else "costs require optimization"}
+- Growth trajectory {"exceeds" if len([k for k in kpis if "Growth" in k.name and k.current_value > 15]) > 0 else "aligns with"} market expectations
+"""
+        
+        # Resource section
+        resource_section = f"""
+**Immediate Actions Required:**
+- {len([r for r in recommendations if r.priority == "high"])} high-priority initiatives requiring executive approval
+- Budget reallocation recommendations totaling strategic optimization potential
+- Technology investments to enhance automation and efficiency
+
+**Budget Impact:**
+- Proposed investments: {sum([25000, 50000, 75000][:len([r for r in recommendations if r.investment_required])])//1000}K range
+- Expected ROI improvement: 15-30% across priority initiatives
+- Timeline for implementation: 30-90 days depending on initiative scope
+"""
+        
+        return self.executive_templates['monthly'].format(
+            period=period,
+            generated_date=datetime.now().strftime("%B %d, %Y"),
+            executive_overview=executive_overview,
+            kpi_section=kpi_section,
+            insights_section=insights_section,
+            recommendations_section=recommendations_section,
+            resource_section=resource_section
+        )
+    
+    def _generate_quarterly_summary(
+        self, 
+        kpis: List[ExecutiveKPI],
+        insights: List[str],
+        recommendations: List[StrategicRecommendation],
+        period: Optional[str] = None
+    ) -> str:
+        """Generate quarterly business review summary."""
+        
+        if not period:
+            current_quarter = (datetime.now().month - 1) // 3 + 1
+            period = f"Q{current_quarter} {datetime.now().year}"
+        
+        # Business impact summary
+        business_impact = f"""
+**Strategic Performance Overview for {period}**
+
+Our marketing technology integration has delivered measurable business impact across key performance indicators. The quarter demonstrated {"strong strategic execution" if len([k for k in kpis if k.current_value >= k.target_value]) >= len(kpis)//2 else "solid progress with optimization opportunities"}.
+
+**Quarterly Achievements:**
+- Revenue growth acceleration through data-driven channel optimization
+- Customer acquisition cost reduction via improved targeting and personalization  
+- Marketing ROI enhancement through advanced attribution modeling
+- Cross-platform integration delivering unified customer journey insights
+
+**Market Position:** {"Market-leading" if len([k for k in kpis if k.current_value > k.target_value * 1.1]) > 0 else "Competitive"} performance across key marketing efficiency metrics.
+"""
+        
+        # Performance against targets
+        performance_section = "## Key Performance Indicators - Quarterly Review\n\n"
+        
+        for kpi in kpis:
+            performance_vs_target = (kpi.current_value / kpi.target_value) * 100 if kpi.target_value > 0 else 0
+            performance_rating = "Exceeds Target" if performance_vs_target >= 110 else "Meets Target" if performance_vs_target >= 90 else "Below Target"
+            
+            performance_section += f"""
+### {kpi.name}
+- **Current Performance:** {kpi.current_value:.1f} {kpi.unit}
+- **Target:** {kpi.target_value:.1f} {kpi.unit}  
+- **Achievement:** {performance_vs_target:.0f}% of target
+- **Status:** {performance_rating}
+- **Strategic Impact:** {kpi.description}
+
+"""
+        
+        # Market analysis
+        market_analysis = """
+**Competitive Positioning:**
+Our integrated marketing approach positions us favorably against industry benchmarks:
+
+- **Marketing Efficiency:** Above-average ROI performance indicates effective resource allocation
+- **Customer Acquisition:** Optimized CAC demonstrates competitive advantage in customer economics
+- **Growth Trajectory:** Sustainable growth rate supports market expansion objectives
+- **Technology Leadership:** Advanced MarTech integration provides data-driven decision making capabilities
+
+**Market Opportunities:**
+- Emerging channels showing high engagement potential
+- Personalization capabilities creating differentiated customer experiences  
+- Attribution modeling enabling optimized budget allocation
+- Cross-platform integration revealing untapped customer journey optimization
+"""
+        
+        # Strategic recommendations for quarterly review
+        strategic_recommendations = "## Strategic Priorities for Next Quarter\n\n"
+        
+        for i, rec in enumerate(recommendations, 1):
+            strategic_recommendations += f"""
+### Priority {i}: {rec.title}
+
+**Strategic Rationale:** {rec.description}
+
+**Business Impact:** {rec.estimated_impact}  
+**Implementation Timeline:** {rec.timeline}  
+**Investment Requirement:** {rec.investment_required or 'To be determined based on scope'}  
+**Risk Assessment:** {rec.risk_level.title()} risk profile
+
+**Success Metrics:** ROI improvement, efficiency gains, growth acceleration
+
+---
+"""
+        
+        # Investment priorities
+        investment_priorities = """
+**Strategic Investment Framework:**
+
+1. **Technology Enhancement** - Marketing automation and AI-driven personalization
+2. **Channel Optimization** - Performance-based budget reallocation  
+3. **Data & Analytics** - Advanced attribution and predictive modeling
+4. **Team Development** - Skills enhancement for integrated marketing operations
+
+**Expected ROI Timeline:** 3-6 months for technology investments, 1-2 months for optimization initiatives
+
+**Budget Recommendations:** Prioritize high-impact, low-risk initiatives with measurable ROI potential
+"""
+        
+        return self.executive_templates['quarterly'].format(
+            period=period,
+            generated_date=datetime.now().strftime("%B %d, %Y"),
+            business_impact=business_impact,
+            performance_section=performance_section,
+            market_analysis=market_analysis,
+            strategic_recommendations=strategic_recommendations,
+            investment_priorities=investment_priorities
+        )
+    
+    def export_executive_summary(
+        self, 
+        summary: str, 
+        filename: str, 
+        format: str = "markdown"
+    ) -> str:
+        """Export executive summary to file."""
+        try:
+            if format == "markdown":
+                with open(filename, 'w', encoding='utf-8') as f:
+                    f.write(summary)
+                return f"Executive summary exported to {filename}"
+            else:
+                logger.warning(f"Export format {format} not yet implemented")
+                return f"Format {format} not supported"
+                
+        except Exception as e:
+            logger.error(f"Error exporting summary: {e}")
+            return f"Export failed: {str(e)}"
+    
+    def generate_board_presentation_summary(self, kpis: List[ExecutiveKPI]) -> str:
+        """Generate ultra-concise summary for board presentations."""
+        
+        above_target = len([kpi for kpi in kpis if kpi.current_value >= kpi.target_value])
+        total_kpis = len(kpis)
+        
+        roi_kpi = next((kpi for kpi in kpis if 'ROI' in kpi.name), None)
+        growth_kpi = next((kpi for kpi in kpis if 'Growth' in kpi.name), None)
+        
+        summary = f"""
+# Marketing Performance - Board Summary
+
+**Performance Status:** {above_target}/{total_kpis} KPIs on target
+
+**Key Metrics:**
+- Marketing ROI: {roi_kpi.current_value:.1f}x (Target: {roi_kpi.target_value:.1f}x)
+- Growth Rate: {growth_kpi.current_value:.1f}% (Target: {growth_kpi.target_value:.1f}%)
+
+**Strategic Status:** {"On track" if above_target >= total_kpis//2 else "Requires attention"}
+
+**Next Quarter Focus:** Channel optimization, automation enhancement, ROI acceleration
+
+---
+*Marketing Technology Leadership by Sotiris Spyrou | https://verityai.co*
+"""
+        return summary
